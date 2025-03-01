@@ -1,0 +1,96 @@
+import time
+import sys
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from rich.text import Text
+from rich.prompt import Prompt
+from rich.progress import track
+
+console = Console()
+
+# Simulated database
+accounts = {}
+
+# Loading effect
+def loading_effect(task):
+    for _ in track(range(10), description=f"[cyan]{task}..."):
+        time.sleep(0.1)
+
+def create_account():
+    console.print(Panel("[bold green]Create a New Account[/bold green]", title="[blue]Banking System"))
+    name = Prompt.ask("Enter your name")
+    pin = Prompt.ask("Enter a 4-digit PIN", password=True)
+    accounts[name] = {"balance": 0, "pin": pin}
+    loading_effect("Creating Account")
+    console.print(f"[bold green]Account for {name} created successfully![/bold green]")
+
+def check_balance():
+    console.print(Panel("[bold yellow]Check Balance[/bold yellow]", title="[blue]Banking System"))
+    name = Prompt.ask("Enter your name")
+    pin = Prompt.ask("Enter your PIN", password=True)
+    
+    if name in accounts and accounts[name]["pin"] == pin:
+        console.print(f"[bold cyan]Your balance: ${accounts[name]['balance']}[/bold cyan]")
+    else:
+        console.print("[bold red]Invalid credentials![/bold red]")
+
+def deposit():
+    console.print(Panel("[bold green]Deposit Money[/bold green]", title="[blue]Banking System"))
+    name = Prompt.ask("Enter your name")
+    amount = float(Prompt.ask("Enter amount to deposit"))
+    
+    if name in accounts:
+        accounts[name]["balance"] += amount
+        loading_effect("Processing Deposit")
+        console.print(f"[bold cyan]Deposited ${amount} successfully! New Balance: ${accounts[name]['balance']}[/bold cyan]")
+    else:
+        console.print("[bold red]Account not found![/bold red]")
+
+def withdraw():
+    console.print(Panel("[bold red]Withdraw Money[/bold red]", title="[blue]Banking System"))
+    name = Prompt.ask("Enter your name")
+    pin = Prompt.ask("Enter your PIN", password=True)
+    amount = float(Prompt.ask("Enter amount to withdraw"))
+    
+    if name in accounts and accounts[name]["pin"] == pin:
+        if accounts[name]["balance"] >= amount:
+            accounts[name]["balance"] -= amount
+            loading_effect("Processing Withdrawal")
+            console.print(f"[bold cyan]Withdrawal Successful! Remaining Balance: ${accounts[name]['balance']}[/bold cyan]")
+        else:
+            console.print("[bold red]Insufficient Funds![/bold red]")
+    else:
+        console.print("[bold red]Invalid credentials![/bold red]")
+
+def main():
+    while True:
+        console.print(Panel("[bold blue]Welcome to CLI Bank![/bold blue]", title="[green]Main Menu"))
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column("Option", style="bold cyan")
+        table.add_column("Action", style="bold yellow")
+        table.add_row("1", "Create Account")
+        table.add_row("2", "Check Balance")
+        table.add_row("3", "Deposit Money")
+        table.add_row("4", "Withdraw Money")
+        table.add_row("5", "Exit")
+        console.print(table)
+        
+        choice = Prompt.ask("Choose an option")
+        if choice == "1":
+            create_account()
+        elif choice == "2":
+            check_balance()
+        elif choice == "3":
+            deposit()
+        elif choice == "4":
+            withdraw()
+        elif choice == "5":
+            console.print("[bold red]Exiting... Thank you for using CLI Bank![/bold red]")
+            sys.exit()
+        else:
+            console.print("[bold red]Invalid option, please try again![/bold red]")
+        time.sleep(1)
+
+if __name__ == "__main__":
+    main()
